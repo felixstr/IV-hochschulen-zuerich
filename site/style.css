@@ -1,0 +1,28 @@
+* {
+	box-sizing: content-box;
+	-webkit-box-sizing: content-box;
+	padding: 0;
+	margin: 0;
+}
+
+rect.button_year {
+	fill: green;
+	color: black;
+}
+
+svg g.year_group g {
+	cursor: pointer;
+}
+svg g.year_group text {
+	fill: white;
+	text-anchor: middle;
+	cursor: pointer;
+	font-family: arial;
+}
+
+svg g.process rect.female {
+	fill: rgba(133, 14, 14, 0.5);
+}
+svg g.process rect.male {
+	fill: rgba(41, 118, 131, 0.5);
+}
