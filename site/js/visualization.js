@@ -1,117 +1,286 @@
-var screenWidth = 1200;
-var screenHeight = 600;
+Number.prototype.map = function ( in_min , in_max , out_min , out_max ) {
+  return ( this - in_min ) * ( out_max - out_min ) / ( in_max - in_min ) + out_min;
+}
 
-var buttonWidth = 80;
+var options = {
+	'width': 1280,
+	'height': 680,
+	'heightClosedMin': 10,
+	'heightClosedIncrease': 10,
+	'margin': 1
+}
 
-var currentYear = 2008;
-var years = null;
+function IV_Highscool_Node() {
+	this.container = null;
+	this.width = null;
+	this.height = null;
+	
+	this.itemName = '';
+	this.idPrefix = '';
+	
+	this.margin = options.margin;
+	this.heightClosed = options.heightClosedMin;
+	this.heightActive = null;
+	
+	this.data = null;
+	this.keys = null;
+	this.currentKey = null;
+	this.parentPrefix = null;
+	
+	this.totalStudents = null;
+	
+	this.child = {};
+	
+	this.visible = false;
+	
+	this.initialize = function() {
+		var self = this;
+		
+		this.keys = Object.keys(this.data);
+		
+		this.totalStudents = this.keys.reduce(function(sum, current){
+			return sum + parseInt(self.data[current].total);
+		}, 0);
+		
+		this.idPrefix = this.itemName+'_';
+		if (this.parentPrefix != null) {
+			this.idPrefix = this.itemName+'_'+this.parentPrefix;
+		}
+		console.log(this.idPrefix);
+	}
+	
+	this.update = function() {
+		var heightBars = (this.keys.length-1) * this.heightClosed;
+		var heightMargin = (this.keys.length-1) * this.margin;
+		this.heightActive = this.height - heightBars - heightMargin;
+	}
 
-var jsonData = null
+	
+	this.addChild = function(key, object) {
+		this.child[key] = object;
+	}
+	
+	this.draw = function() {
+		var self = this;
+		console.log(this.itemName+ ' draw()');
+		
+		var selection = this.container
+			.selectAll('g.bar_'+self.itemName);
+		
+		var yPos = 0;
+		var group_bar = selection
+			.data(this.keys);
+		
+		// UPDATE
+		var update = group_bar;
+		update
+			.transition()
+			.duration(1000)
+			//.ease('sin')
+			.attr('transform', function(key, i) { 
+				
+				var result = 'translate(0, '+yPos+')';
+				if (self.currentKey == null) {
+					var barHeight = self.getBarHeight(key);
+					yPos += barHeight+self.margin;
+				} else {
+					if (key == self.currentKey) {
+						yPos += self.heightActive+self.margin;
+					} else {
+						yPos += self.heightClosed+self.margin;
+					}					
+				}
 
+				return result;
+			})
+			.attr('style', function() { return self.visible ? 'display: block' : 'display: none'; })
+			.selectAll('rect.pice_'+self.itemName)
+			.attr('height', function(key) {
+				var result = self.getBarHeight(key);
+				if (self.currentKey != null) {
+					if (key == self.currentKey) { 
+						result = self.heightActive;
+					} else {
+						result = self.heightClosed;
+					}
+				}
+				
+				return result;
+			})
+			.each('end', function(key, i) {
+				if (Object.keys(self.child).length > 0) {
+					if (key == self.keys[self.keys.length-1] && self.currentKey != null) {
+						
+						if (i == 0) {
+							console.log('show child');
+							var child = self.child[self.currentKey];
+							child.visible = true;
+							child.update();
+							child.draw();
+														
+							d3.selectAll('#'+self.idPrefix+self.currentKey+' > rect')
+								.attr('style', 'display: none');
+						
+						}
+						
+					}
+				}
+				
+				
+				
+				
+			});
+			
+		
+		// ENTER
+		var enter = group_bar
+			.enter()
+			.append('g')
+			.attr('transform', function(key, i) { 
+				var barHeight = self.getBarHeight(key);
+				var result = 'translate(0, '+yPos+')';
+				yPos += barHeight+self.margin;
+				return result;
+			})
+			.classed('bar_'+self.itemName, true)
+			.attr('id', function(key) { return self.idPrefix+key; })
+			.attr('style', function() { return self.visible ? 'display: block' : 'display: none'; });
+	
+		
+		// female
+		enter
+			.append('rect')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('height', function(key) {
+				return self.getBarHeight(key);
+			})
+			.attr('width', function(key) {
+				return self.getFemaleBarWidth(key);
+			})
+			.classed('bar_female', true)
+			.classed('pice_'+self.itemName, true)
+			.on('mouseover', function(key) {
+				console.log('hover');
+				console.log('#'+self.idPrefix+key);
+				// console.log(d3.select('#'+self.itemName+'_'+key+'_'+self.parentKey));
+				d3.select('#'+self.idPrefix+key).classed('hover', true);
+			})
+			.on('mouseout', function(key) {
+				d3.select('#'+self.idPrefix+key).classed('hover', false);
+			})
+			.on('click', function(key) { 
+				self.currentKey = key;
+				self.draw();
+			});
+		
+		// male
+		enter
+			.append('rect')
+			.attr('y', 0)
+			.attr('x', function(key) {
+				return self.getFemaleBarWidth(key);
+			})
+			.attr('height', function(key) {
+				return self.getBarHeight(key);
+			})
+			.attr('width', function(key) {
+				var stuff = self.data[key];
+				var male = parseInt(stuff.male);
+				return male.map(0, stuff.total, 0, self.width);
+			})
+			.classed('bar_male', true)
+			.classed('pice_'+self.itemName, true)
+			.on('mouseover', function(key) {
+				d3.select('#'+self.idPrefix+key).classed('hover', true);
+			})
+			.on('mouseout', function(key) {
+				d3.select('#'+self.idPrefix+key).classed('hover', false);
+			})
+			.on('click', function(key) { 
+				self.currentKey = key;
+				self.draw();
+			});
+		
+		
+		
+		
+		Object.keys(this.child).forEach(function(key) {
+			// console.log(key);
+			var child = self.child[key];
+			child.container = d3.select('#'+self.idPrefix+key);
+			child.width = self.width;
+			child.height = self.heightActive;
+			child.heightClosed = self.heightClosed + options.heightClosedIncrease;
+			child.update();
+			child.draw();
+		});
+		
+		
+	}
+	
+	this.getFemaleBarWidth = function(key) {
+		var stuff = this.data[key];
+		var female = parseInt(stuff.female);
+		return female.map(0, stuff.total, 0, this.width);
+	}
+	
+	this.getBarHeight = function(key) {
+		var stuff = this.data[key];
+		
+		var total = parseInt(stuff.total);
+		var max = this.height-((this.keys.length-1)*this.margin);
+		return total.map(0, this.totalStudents, 0, max);
+	}
+	
+}
 
 d3.json("data.json", function(data) {
-	// console.log(data);
-	jsonData = data
-	years = Object.keys(jsonData);
+
 	
-	// total pro jahr
+	
+	var canvas = d3.select('#graph')
+		.attr('width', options.width)
+		.attr('height', options.height);
 		
-	var selection_canvas = d3.select('#graph')
-		.attr('width', screenWidth)
-		.attr('height', screenHeight);
-	
-	// year navigation
-	var selection_years = selection_canvas
-		.append('g')
-		.classed('year_group', true).selectAll('g');
-	var group_button = selection_years
-		.data(years)
-		.enter()
-		.append('g')
-		.attr('transform', function(d, i) { return 'translate('+i*(buttonWidth+5)+',0)' });
-	group_button
-		.append('rect')
-		.attr('x', 0)
-		.attr('y', 0)
-		.attr('width', buttonWidth)
-		.attr('height', 30)
-		.on('click', function(d) { change_year(d); });
-	group_button
-		.append('text')
-		.attr('x', buttonWidth/2)
-		.attr('y', 20)
-		.text(function(d) { return d })
-		.on('click', function(d) { change_year(d); });
+
+	var yearObj = new IV_Highscool_Node();
+	yearObj.visible = true;
+	yearObj.container = canvas;
+	yearObj.width = options.width;
+	yearObj.height = options.height;
+	yearObj.itemName = 'year';
+	yearObj.data = data;
+	yearObj.initialize();
+	yearObj.update();
 	
 	
-	// graph
-	var selection_graph = selection_canvas
-		.append('g')
-		.classed('schools', true)
-		.attr('transform', function(d, i) { return 'translate(500,150)'; });
-	
-	updateGraph();
-	
-	
-	// verlauf total
-	var totals = years.map(function(item) {
-		return [jsonData[item].female/1000, jsonData[item].male/1000];
+	Object.keys(data).forEach(function(year) {
+		var schoolObj = new IV_Highscool_Node();
+		schoolObj.itemName = 'school';
+		schoolObj.parentPrefix = year+'_';
+		schoolObj.data = data[year].schools;
+		schoolObj.initialize();
+		
+		Object.keys(data[year].schools).forEach(function(school) {			
+			var subjectObj = new IV_Highscool_Node();
+			subjectObj.itemName = 'subject';
+			subjectObj.parentPrefix = schoolObj.parentPrefix+school+'_';
+			subjectObj.data = data[year].schools[school].subject;
+			subjectObj.initialize();
+			
+			schoolObj.addChild(school, subjectObj);
+		});
+		
+		yearObj.addChild(year, schoolObj);
 	});
 	
-	var process = selection_canvas
-		.append('g')
-		.classed('process', true)
-		.attr('transform', function(d, i) { return 'translate(0,50)'; });
-	process.selectAll('rect.female')
-		.data(totals)
-		.enter()
-		.append('rect')
-		.classed('female', true)
-		.attr('width', buttonWidth/2)
-		.attr('height', function(d) { return d[0]*2; })
-		.attr('x', function(d, i) { return i*(buttonWidth+5); });
-	process.selectAll('rect.male')
-		.data(totals)
-		.enter()
-		.append('rect')
-		.classed('male', true)
-		.attr('width', buttonWidth/2)
-		.attr('height', function(d) { return d[1]*2; })
-		.attr('x', function(d, i) { return i*(buttonWidth+5)+(buttonWidth/2); });
+	
+	
+	
+	yearObj.draw();
+	
+	
+	
+
 });
-
-
-function updateGraph() {
-	// graph
-	var selection_canvas = d3.select('g.schools');
-	
-	/*
-	console.log(jsonData[currentYear].Universitaet.female_percent);
-	console.log(jsonData[currentYear].ETH.female_percent);
-	console.log(jsonData[currentYear].Fachhochschulen.female_percent);
-*/
-	
-	var selection_graph = selection_canvas.selectAll('rect')
-		.data([
-			jsonData[currentYear].Universitaet.female_percent, 
-			jsonData[currentYear].ETH.female_percent, 
-			jsonData[currentYear].Fachhochschulen.female_percent
-		]);
-	selection_graph
-		.transition()
-		.attr('height', function(d) { return d; });
-	selection_graph
-		.enter()
-		.append('rect')
-		.attr('width', '50')
-		.attr('height', function(d) { return d; })
-		.attr('x', function(d,i){ return i*51; });
-	
-}
-
-function change_year(year) {
-	currentYear = year;
-	updateGraph();
-
-	
-}
