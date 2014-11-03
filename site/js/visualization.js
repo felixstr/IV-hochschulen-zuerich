@@ -3,11 +3,14 @@ Number.prototype.map = function ( in_min , in_max , out_min , out_max ) {
 }
 
 var options = {
-	'width': 1280,
+	'width': 1200,
 	'height': 680,
 	'heightClosedMin': 10,
-	'heightClosedIncrease': 10,
-	'margin': 1
+	'heightClosedIncrease': 0,
+	'heightBarMin': 20,
+	'margin': 4,
+	'marginLevel': 0,
+	'width50Line': 1
 }
 
 function IV_Highscool_Node() {
@@ -19,6 +22,7 @@ function IV_Highscool_Node() {
 	this.idPrefix = '';
 	
 	this.margin = options.margin;
+	this.marginLevel = options.marginLevel;
 	this.heightClosed = options.heightClosedMin;
 	this.heightActive = null;
 	
@@ -32,11 +36,12 @@ function IV_Highscool_Node() {
 	this.child = {};
 	
 	this.visible = false;
+	this.front = false;
 	
 	this.initialize = function() {
 		var self = this;
 		
-		this.keys = Object.keys(this.data);
+		this.keys = Object.keys(this.data).sort(function(a,b) { return b - a; }); // sort keys
 		
 		this.totalStudents = this.keys.reduce(function(sum, current){
 			return sum + parseInt(self.data[current].total);
@@ -46,13 +51,13 @@ function IV_Highscool_Node() {
 		if (this.parentPrefix != null) {
 			this.idPrefix = this.itemName+'_'+this.parentPrefix;
 		}
-		console.log(this.idPrefix);
+		// console.log(this.idPrefix);
 	}
 	
 	this.update = function() {
 		var heightBars = (this.keys.length-1) * this.heightClosed;
 		var heightMargin = (this.keys.length-1) * this.margin;
-		this.heightActive = this.height - heightBars - heightMargin;
+		this.heightActive = this.height - heightBars - heightMargin - (2*this.marginLevel);
 	}
 
 	
@@ -62,21 +67,27 @@ function IV_Highscool_Node() {
 	
 	this.draw = function() {
 		var self = this;
-		console.log(this.itemName+ ' draw()');
+		// console.log(this.itemName+ ' draw()');
 		
 		var selection = this.container
 			.selectAll('g.bar_'+self.itemName);
 		
-		var yPos = 0;
+		var yPos = this.marginLevel;
 		var group_bar = selection
 			.data(this.keys);
 		
 		// UPDATE
 		var update = group_bar;
 		update
+			.selectAll('rect.pice_'+self.itemName)
+			.on('mouseover', function(key) { self.bar_rect_hover(key); })
+			.on('mouseout', function(key) { self.bar_rect_out(key);	})
+			.on('click', function(key) { self.bar_click(key) });
+			
+		var updateTransition = update
 			.transition()
 			.duration(1000)
-			//.ease('sin')
+			// .ease('bubble')
 			.attr('transform', function(key, i) { 
 				
 				var result = 'translate(0, '+yPos+')';
@@ -85,6 +96,7 @@ function IV_Highscool_Node() {
 					yPos += barHeight+self.margin;
 				} else {
 					if (key == self.currentKey) {
+						result = 'translate(0, '+yPos+')';
 						yPos += self.heightActive+self.margin;
 					} else {
 						yPos += self.heightClosed+self.margin;
@@ -94,6 +106,49 @@ function IV_Highscool_Node() {
 				return result;
 			})
 			.attr('style', function() { return self.visible ? 'display: block' : 'display: none'; })
+			.each('start', function(key) {
+				
+				if (self.front && self.currentKey == null && Object.keys(self.child).length > 0) {
+					if (self.child[key].visible) {
+						
+						self.child[key].visible = false;
+						self.child[key].front = false;
+						self.child[key].update();
+						self.child[key].draw();
+
+						d3.selectAll('#'+self.idPrefix+key+' > rect')
+							.attr('style', 'display: block');
+					}
+					
+				}	
+				
+			})
+			.each('end', function(key, i) {
+				// console.log('end');
+				d3.selectAll('#'+self.idPrefix+key).classed('active', self.front);
+				
+				if (Object.keys(self.child).length > 0) {
+					if (key == self.keys[self.keys.length-1] && self.currentKey != null) {
+						
+						// console.log('show child');
+													
+						
+						var child = self.child[self.currentKey];
+						child.visible = true;
+						child.front = true;
+						child.update();
+						child.draw();
+													
+						d3.selectAll('#'+self.idPrefix+self.currentKey+' > rect')
+							.attr('style', 'display: none');
+							
+
+					}
+				}
+				
+			});
+			
+		updateTransition
 			.selectAll('rect.pice_'+self.itemName)
 			.attr('height', function(key) {
 				var result = self.getBarHeight(key);
@@ -106,29 +161,20 @@ function IV_Highscool_Node() {
 				}
 				
 				return result;
-			})
-			.each('end', function(key, i) {
-				if (Object.keys(self.child).length > 0) {
-					if (key == self.keys[self.keys.length-1] && self.currentKey != null) {
-						
-						if (i == 0) {
-							console.log('show child');
-							var child = self.child[self.currentKey];
-							child.visible = true;
-							child.update();
-							child.draw();
-														
-							d3.selectAll('#'+self.idPrefix+self.currentKey+' > rect')
-								.attr('style', 'display: none');
-						
-						}
-						
+			});
+			
+		updateTransition
+			.select('text.label')
+			.attr('y', function(key) { 
+				var result = (self.getBarHeight(key)/2)+3; 
+				
+				if (self.currentKey != null) {
+					if (key == self.currentKey) { 
+						result = self.heightActive / 2;
 					}
 				}
 				
-				
-				
-				
+				return result;
 			});
 			
 		
@@ -143,9 +189,11 @@ function IV_Highscool_Node() {
 				return result;
 			})
 			.classed('bar_'+self.itemName, true)
+			.classed('active', self.front)
 			.attr('id', function(key) { return self.idPrefix+key; })
 			.attr('style', function() { return self.visible ? 'display: block' : 'display: none'; });
-	
+		
+		
 		
 		// female
 		enter
@@ -160,19 +208,9 @@ function IV_Highscool_Node() {
 			})
 			.classed('bar_female', true)
 			.classed('pice_'+self.itemName, true)
-			.on('mouseover', function(key) {
-				console.log('hover');
-				console.log('#'+self.idPrefix+key);
-				// console.log(d3.select('#'+self.itemName+'_'+key+'_'+self.parentKey));
-				d3.select('#'+self.idPrefix+key).classed('hover', true);
-			})
-			.on('mouseout', function(key) {
-				d3.select('#'+self.idPrefix+key).classed('hover', false);
-			})
-			.on('click', function(key) { 
-				self.currentKey = key;
-				self.draw();
-			});
+			.on('click', function(key) { self.bar_click(key) })
+			.on('mouseover', function(key) { self.bar_rect_hover(key) })
+			.on('mouseout', function(key) { self.bar_rect_out(key) });
 		
 		// male
 		enter
@@ -191,17 +229,20 @@ function IV_Highscool_Node() {
 			})
 			.classed('bar_male', true)
 			.classed('pice_'+self.itemName, true)
-			.on('mouseover', function(key) {
-				d3.select('#'+self.idPrefix+key).classed('hover', true);
-			})
-			.on('mouseout', function(key) {
-				d3.select('#'+self.idPrefix+key).classed('hover', false);
-			})
-			.on('click', function(key) { 
-				self.currentKey = key;
-				self.draw();
-			});
-		
+			.on('click', function(key) { self.bar_click(key); })
+			.on('mouseover', function(key) { self.bar_rect_hover(key); })
+			.on('mouseout', function(key) { self.bar_rect_out(key); });
+			
+		// label
+		enter
+			.append('text')
+			.classed('label', true)
+			.attr('x', self.width/2)
+			.attr('y', function(key) { return (self.getBarHeight(key)/2)+3; })
+			.text(function(key) { return self.data[key].name; })
+			.on('click', function(key) { self.bar_click(key); })
+			.on('mouseover', function(key) { self.bar_rect_hover(key); })
+			.on('mouseout', function(key) { self.bar_rect_out(key); });
 		
 		
 		
@@ -216,7 +257,40 @@ function IV_Highscool_Node() {
 			child.draw();
 		});
 		
+	}
+	
+	this.bar_click = function(key) {
+		var self = this;
 		
+		if (self.front) {
+			self.front = false;
+			self.currentKey = key;
+		} else {
+			self.front = true
+			self.currentKey = null;
+			d3.selectAll('.bar_'+self.itemName).classed('hover', false);
+		}
+
+
+		self.draw();
+	}
+	this.bar_rect_hover = function(key) {
+		var self = this;
+
+		if (self.front) {
+			d3.select('#'+self.idPrefix+key).classed('hover', true);
+		} else {
+			d3.selectAll('.bar_'+self.itemName).classed('hover', true);
+		}
+	}
+	this.bar_rect_out = function(key) {
+		var self = this;
+		
+		if (self.front) {
+			d3.select('#'+self.idPrefix+key).classed('hover', false);
+		} else {
+			d3.selectAll('.bar_'+self.itemName).classed('hover', false);
+		}
 	}
 	
 	this.getFemaleBarWidth = function(key) {
@@ -228,21 +302,32 @@ function IV_Highscool_Node() {
 	this.getBarHeight = function(key) {
 		var stuff = this.data[key];
 		
+		// console.log(this.data);
+		// console.log(stuff);
+		
 		var total = parseInt(stuff.total);
-		var max = this.height-((this.keys.length-1)*this.margin);
-		return total.map(0, this.totalStudents, 0, max);
+		var max = this.height-((this.keys.length-1)*this.margin+(2*this.marginLevel));
+		
+		var min = options.heightBarMin;
+		max = max-(min*(this.keys.length-1));
+		// console.log(max);
+		return total.map(0, this.totalStudents, min, max);
 	}
 	
 }
 
 d3.json("data.json", function(data) {
-
-	
 	
 	var canvas = d3.select('#graph')
 		.attr('width', options.width)
 		.attr('height', options.height);
 		
+	canvas
+		.append('rect')
+		.classed('line50', true)
+		.attr('width', options.width50Line)
+		.attr('height', options.height)
+		.attr('x', options.width/2);
 
 	var yearObj = new IV_Highscool_Node();
 	yearObj.visible = true;
@@ -250,6 +335,8 @@ d3.json("data.json", function(data) {
 	yearObj.width = options.width;
 	yearObj.height = options.height;
 	yearObj.itemName = 'year';
+	yearObj.marginLevel = 0;
+	yearObj.front = true;
 	yearObj.data = data;
 	yearObj.initialize();
 	yearObj.update();

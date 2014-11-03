@@ -3,6 +3,7 @@
 	-webkit-box-sizing: content-box;
 	padding: 0;
 	margin: 0;
+	overflow: hidden;
 }
 
 svg {
@@ -10,19 +11,57 @@ svg {
 	position: relative;
 	margin: 0 auto;
 }
-svg rect {
-	cursor: pointer;
-}
-svg rect.bar_male {
-	fill: rgba(41, 118, 131, 0.5);
-}
-svg rect.bar_female {
-	fill: rgba(133, 14, 14, 0.5);
+
+svg rect.line50 {
+	fill: #333;
 }
 
-svg g.hover rect.bar_male {
+svg g rect {
+	cursor: pointer;
+}
+
+
+
+svg g.active > rect.bar_male {
+	fill: rgba(41, 118, 131, 0.5);
+	fill: #83adb4;
+}
+svg g.active > rect.bar_female {
+	fill: rgba(133, 14, 14, 0.5);
+	fill: #b47274;
+}
+
+svg g.active.hover > rect.bar_male {
 	fill: rgba(41, 118, 131, 1);
 }
-svg g.hover rect.bar_female {
+svg g.active.hover > rect.bar_female {
 	fill: rgba(133, 14, 14, 1);
+}
+
+
+svg g > rect.bar_male {
+	fill: rgba(108, 108, 108, 0.5);
+	fill: #a7a7a7;
+/* 	background: rgba(0, 0, 0, 0.5) */
+}
+svg g > rect.bar_female {
+	fill: rgba(0, 0, 0, 0.5);
+	fill: #6d6d6d;
+/* 	background: rgba(108, 108, 108, 0.5) */
+}
+svg g.hover > rect.bar_male {
+	fill: rgba(108, 108, 108, 1);
+}
+svg g.hover > rect.bar_female {
+	fill: rgba(0, 0, 0, 1);
+}
+
+
+/* label */
+svg g text {
+	fill: white;
+	text-anchor: middle;
+	font-family: arial;
+	cursor: pointer;
+	font-size: 10px;
 }
