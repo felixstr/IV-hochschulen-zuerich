@@ -4,6 +4,8 @@
 	padding: 0;
 	margin: 0;
 	overflow: hidden;
+	
+	font-family: arial;
 }
 
 svg {
@@ -12,8 +14,13 @@ svg {
 	margin: 0 auto;
 }
 
-svg rect.line50 {
-	fill: #333;
+svg line.line50 {
+	stroke: white;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-width: 2;
+	
+	display: none;
 }
 
 svg g rect {
@@ -22,46 +29,112 @@ svg g rect {
 
 
 
-svg g.active > rect.bar_male {
-	fill: rgba(41, 118, 131, 0.5);
-	fill: #83adb4;
+svg g.bar_year > rect.bar_male,
+svg g.bar_school > rect.bar_male,
+svg g.bar_subject > rect.bar_male {
+	fill: url(#gradientMale);
 }
-svg g.active > rect.bar_female {
-	fill: rgba(133, 14, 14, 0.5);
-	fill: #b47274;
-}
-
-svg g.active.hover > rect.bar_male {
-	fill: rgba(41, 118, 131, 1);
-}
-svg g.active.hover > rect.bar_female {
-	fill: rgba(133, 14, 14, 1);
+svg g.bar_year > rect.bar_female,
+svg g.bar_school > rect.bar_female,
+svg g.bar_subject > rect.bar_female {
+	fill: url(#gradientFemale);
 }
 
-
-svg g > rect.bar_male {
-	fill: rgba(108, 108, 108, 0.5);
-	fill: #a7a7a7;
-/* 	background: rgba(0, 0, 0, 0.5) */
+svg g.bar_year.hover > rect.bar_male,
+svg g.bar_school.hover > rect.bar_male,
+svg g.bar_subject.hover > rect.bar_male {
+	fill: url(#gradientMaleOver);
 }
-svg g > rect.bar_female {
-	fill: rgba(0, 0, 0, 0.5);
-	fill: #6d6d6d;
-/* 	background: rgba(108, 108, 108, 0.5) */
-}
-svg g.hover > rect.bar_male {
-	fill: rgba(108, 108, 108, 1);
-}
-svg g.hover > rect.bar_female {
-	fill: rgba(0, 0, 0, 1);
+svg g.bar_year.hover > rect.bar_female,
+svg g.bar_school.hover > rect.bar_female,
+svg g.bar_subject.hover > rect.bar_female {
+	fill: url(#gradientFemaleOver);
 }
 
+
+body.level_1 svg g.bar_year > rect.bar_male,
+body.level_1 svg g.bar_year > rect.bar_female,
+body.level_2 svg g.bar_school > rect.bar_male,
+body.level_2 svg g.bar_school > rect.bar_female,
+body.level_3 svg g.bar_subject > rect.bar_male,
+body.level_3 svg g.bar_subject > rect.bar_female {
+	fill: #453f52; /* dunkel */
+}
+body.level_2 svg g.bar_year > rect.bar_male,
+body.level_2 svg g.bar_year > rect.bar_female,
+body.level_3 svg g.bar_school > rect.bar_male,
+body.level_3 svg g.bar_school > rect.bar_female {
+	fill: #746e7f; /* mittel */
+}
+
+body.level_3 svg g.bar_year > rect.bar_male,
+body.level_3 svg g.bar_year > rect.bar_female {
+	fill: #a8a4af; /* hell */
+}
+
+
+/* info text */
+svg  text.info {
+	fill: white;
+	opacity: 0;
+}
+svg  g.hover > text.info {
+	opacity: 1;
+}
 
 /* label */
-svg g text {
+svg g.label rect {
 	fill: white;
-	text-anchor: middle;
+}
+svg g.label text {
+	fill: #0f091d;
 	font-family: arial;
 	cursor: pointer;
-	font-size: 10px;
+	font-size: 12px;
+}
+svg g.hover > g.label rect {
+	fill: #0f091d;
+}
+svg g.hover > g.label text {
+	fill: white;
+}
+
+
+/* infoContainer */
+div.infoContainer {
+	position: absolute;
+	width: 230px;
+	background: white;
+	top: 0px;
+	left: 50%;
+	padding: 10px;
+	
+	color: #333;
+	font-family: arial;
+	font-size: 14px;
+	
+	
+	transition-property: left top;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+	-webkit-transition-property: left top;
+	-webkit-transition-duration: 0.2s;
+	-webkit-transition-timing-function: ease-in-out;
+}
+
+div.infoContainer h1 {
+	font-size: 16px;
+}
+
+div.infoContainer.back {
+	width: 150px;
+	background: black;
+	color: white;
+	text-align: center;
+}
+
+path.line {
+	fill: none;
+	stroke: #777;
+    shape-rendering: crispEdges;
 }

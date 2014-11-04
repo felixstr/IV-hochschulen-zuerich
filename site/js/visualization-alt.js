@@ -9,20 +9,16 @@ $(document).mousemove(function(event) {
 });
 
 var options = {
-	'width': 600,
+	'width': 500,
 	'height': 680,
 	'heightClosedMin': 15,
 	'heightClosedIncrease': 0,
-	'heightBarMin': 25,
+	'heightBarxMin': 25,
 	'margin': 2,
 	'marginClosed': 2, 
 	'marginLevel': 0,
-	'mouseDistanzeInfo': 50,
-	'paddingTextWidth': 26,
-	'paddingTextHeight': 5
+	'mouseDistanzeInfo': 50
 }
-
-var currentLevel = 0;
 
 function IV_Highscool_Node() {
 	this.container = null;
@@ -55,8 +51,6 @@ function IV_Highscool_Node() {
 	this.absoluteYPos = 0;
 	this.yPosStartChild = 0;
 	this.barPositionTop = [];
-	
-	this.level = 0;
 	
 	
 	this.initialize = function() {
@@ -111,6 +105,7 @@ function IV_Highscool_Node() {
 		var updateTransition = update
 			.transition()
 			.duration(1000)
+			.ease('circle')
 			.attr('transform', function(key, i) { 
 				
 				var result = 'translate(0, '+yPos+')';
@@ -139,6 +134,8 @@ function IV_Highscool_Node() {
 			.each('start', function(key, i) {
 				
 				if (self.front && self.currentKey == null && Object.keys(self.child).length > 0) {
+					
+					
 					if (self.child[key].visible) {
 						
 						self.child[key].visible = false;
@@ -149,27 +146,28 @@ function IV_Highscool_Node() {
 						} else {
 							self.child[key].draw();
 						}
-						
-						$('body').attr('class', 'level_'+(self.level));
 					}
 					
 				}
 				
 				if (key == self.keys[self.keys.length-1]) {
-										
+					// $('div.infoContainer').hide();
+					
 					if (self.front && self.currentKey == null) {
 						d3.selectAll('.bar_'+self.itemName+' > rect')
 							.attr('style', 'display: block');
-						d3.selectAll('.bar_'+self.itemName+' > g.label')
-							.attr('style', 'display: block');							
+						d3.selectAll('.bar_'+self.itemName+' > text')
+							.attr('style', 'display: block');
+							
 						
+		
 					}
 					
 				}
 				
 			})
 			.each('end', function(key, i) {
-				// console.log('end1');
+				// console.log('end');
 				d3.selectAll('#'+self.idPrefix+key).classed('active', self.front);
 				
 				if (key == self.keys[self.keys.length-1]) {
@@ -189,14 +187,11 @@ function IV_Highscool_Node() {
 						d3.selectAll('#'+self.idPrefix+self.currentKey+' > rect')
 							.attr('style', 'display: none');
 							
-						d3.selectAll('.bar_'+self.itemName+' > g.label')
+						d3.selectAll('.bar_'+self.itemName+' > text')
 							.attr('style', 'display: none');
 							
-						$('body').attr('class', 'level_'+(self.level+1));
-					} 
-					
-					
-					/*else if (self.detailData && self.currentKey != null) {
+	
+					} /*else if (self.detailData && self.currentKey != null) {
 						self.drawDetail();
 						
 						d3.selectAll('#'+self.idPrefix+self.currentKey+' > rect')
@@ -225,25 +220,18 @@ function IV_Highscool_Node() {
 			});
 			
 		updateTransition
-			.select('g.label')
-			.attr('transform', function(key) {
-
+			.select('text.label')
+			.attr('y', function(key) { 
+				var result = (self.getBarHeight(key)/2)+3; 
 				
-				var elementText = d3.select(this).select('text').node().getBBox();
-
-				var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
-				var yPos = (self.getBarHeight(key)/2)- (elementText.height/2) - (options.paddingTextHeight/2);
-				
-				if (self.currentKey != null && key == self.currentKey) { 
-					yPos = self.heightActive / 2;
+				if (self.currentKey != null) {
+					if (key == self.currentKey) { 
+						result = self.heightActive / 2;
+					}
 				}
 				
-				console.log(xPos);
-				
-				return 'translate('+xPos+', '+yPos+')';
-				
+				return result;
 			});
-		
 			
 		
 		// ENTER
@@ -302,78 +290,17 @@ function IV_Highscool_Node() {
 			.on('mouseover', function(key) { self.barMouseOver(key); })
 			.on('mouseout', function(key) { self.barMouseOut(key); });
 			
-		// info female
-		enter
-			.append('text')
-			.classed('info', true)
-			.text(function(key) {
-				return self.data[key].female_percent+'%';
-			})
-			.attr('x', 10)
-			.attr('y', function(key) {
-				// console.log(d3.select(this).node().getBBox().height);
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
-			});
-		enter
-			.append('text')
-			.classed('info', true)
-			.text(function(key) {
-				return self.data[key].male_percent+'%';
-			})
-			.attr('x', function(){
-				return self.width - (d3.select(this).node().getBBox().width) - 10;
-			})
-			.attr('y', function(key) {
-				// console.log(d3.select(this).node().getBBox().height);
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
-			});
-		
-		
-		// info male
-			
 		// label
-		var enterLabelG = enter
-			.append('g')
-			.classed('label', true);
-		var labelRect = enterLabelG
-			.append('rect')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('rx', 10)
-			.attr('ry', 10)
-			.on('click', function(key) { self.barClick(key); })
-			.on('mouseover', function(key) { self.barMouseOver(key, yPos); })
-			.on('mouseout', function(key) { self.barMouseOut(key); });
-			
-		var labelText = enterLabelG
+		enter
 			.append('text')
-			.attr('x', options.paddingTextWidth/2)
-			.attr('y', 13)
+			.classed('label', true)
+			.attr('x', self.width/2)
+			.attr('y', function(key) { return (self.getBarHeight(key)/2)+3; })
 			.text(function(key) { return self.data[key].name; })
 			.on('click', function(key) { self.barClick(key); })
 			.on('mouseover', function(key) { self.barMouseOver(key, yPos); })
 			.on('mouseout', function(key) { self.barMouseOut(key); });
 		
-		enter.selectAll('g')
-			.attr('transform', function(key) {
-				var elementText = d3.select(this).select('text').node().getBBox();
-
-				var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
-				var yPos = (self.getBarHeight(key)/2)- (elementText.height/2) - (options.paddingTextHeight/2);
-								
-				return 'translate('+xPos+', '+yPos+')';
-			})
-			.select('rect')
-			.attr('width', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.width+options.paddingTextWidth;
-			})
-			.attr('height', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.height+options.paddingTextHeight;
-			});
-			
-
 		
 		
 		Object.keys(this.child).forEach(function(key) {
@@ -401,26 +328,15 @@ function IV_Highscool_Node() {
 		if (self.front) {
 			self.front = false;
 			self.currentKey = key;
-			
-						
 		} else {
-			self.closeChild();
-			self.front = true;
+			self.front = true
+			self.currentKey = null;
 			d3.selectAll('.bar_'+self.itemName).classed('hover', false);
 		}
 
 
 		self.draw();
 	}
-	
-	this.closeChild = function() {
-		var self = this;
-		Object.keys(self.child).forEach(function(item) {
-			self.child[item].closeChild();
-		});
-		self.currentKey = null;
-	}
-	
 	this.barMouseOver = function(key) {
 		var self = this;
 
@@ -435,7 +351,14 @@ function IV_Highscool_Node() {
 	this.barMouseOut = function(key) {
 		var self = this;
 		
-		d3.selectAll('.bar_'+self.itemName).classed('hover', false);
+		if (!$(d3.event.relatedTarget).hasClass('infoContainer')) {
+			d3.selectAll('.bar_'+self.itemName).classed('hover', false);
+		
+		
+			// hide container
+		
+			$('div.infoContainer').hide();
+		}
 
 	}
 	
@@ -469,8 +392,7 @@ function IV_Highscool_Node() {
 		// content
 		if (self.front) {
 			// content
-			/*
-$('div.infoContainer').removeClass('back');
+			$('div.infoContainer').removeClass('back');
 			
 			$('div.infoContainer').html("\
 				<h1>"+self.data[key].name+"</h1>\
@@ -479,22 +401,18 @@ $('div.infoContainer').removeClass('back');
 				Männer: "+self.data[key].male+"<br>\
 				Frauenanteil: "+self.data[key].female_percent+"\
 			");
-*/
 		} else {
-			/*
-$('div.infoContainer').addClass('back');
+			$('div.infoContainer').addClass('back');
 			
 			$('div.infoContainer').html("\
 				<h1>Alle "+Translation[self.itemName]+"</h1>\
 			");
-*/
 		}	
 		
-// 		var containerHeight = $('div.infoContainer').outerHeight();
+		var containerHeight = $('div.infoContainer').outerHeight();
 		var top = 0;
 		
-		/*
-// top position
+		// top position
 		if (self.front) { 
 			top = self.absoluteYPos + self.barYPosition[key] + (self.getBarHeight(key)/2) - (containerHeight/2);
 		
@@ -519,32 +437,25 @@ $('div.infoContainer').addClass('back');
 			}		
 			
 		}
-*/
 		
 		
-		/*
-// position off-canvas
+		// position off-canvas
 		if (top < 0) {
 			top = 0;
 		} else if (top+containerHeight > options.height) {
 			top = options.height - containerHeight;
 		}
-*/
-		/*
-
+		
 		$('div.infoContainer').css({
 			'top': top+'px'
 		});
 		
 		$('div.infoContainer').show();
 		
-*/
 	}
 	
 	this.drawDetail = function() {
 		var self = this;
-		
-		
 		
 		var data = self.data;
 		var dataKeys = Object.keys(data);
@@ -703,7 +614,7 @@ d3.json("data.json", function(data) {
 			.attr("stop-opacity", 1);
 		gradientMaleOver.append("svg:stop")
 	    	.attr("offset", "100%")
-			.attr("stop-color", "#0a2938")
+			.attr("stop-color", "#127185")
 			.attr("stop-opacity", 1);
 	}
 	
@@ -727,7 +638,6 @@ d3.json("data.json", function(data) {
 		schoolObj.itemName = 'school';
 		schoolObj.parentPrefix = year+'_';
 		schoolObj.data = data.chronologic[year].schools;
-		schoolObj.level = 1;
 		schoolObj.initialize();
 		
 		Object.keys(data.chronologic[year].schools).forEach(function(school) {			
@@ -736,7 +646,6 @@ d3.json("data.json", function(data) {
 			subjectObj.parentPrefix = schoolObj.parentPrefix+school+'_';
 			subjectObj.data = data.chronologic[year].schools[school].subject;
 			subjectObj.detailData = data.detail[school];
-			subjectObj.level = 2;
 			subjectObj.initialize();
 			
 			Object.keys(data.chronologic[year].schools[school].subject).forEach(function(subject) {
@@ -745,7 +654,6 @@ d3.json("data.json", function(data) {
 				detailObj.parentPrefix = subjectObj.parentPrefix+subject+'_';
 				detailObj.data = data.detail[school][subject];
 				detailObj.detail = true;
-				detailObj.level = 3;
 				detailObj.initialize();
 				
 				subjectObj.addChild(subject, detailObj);
@@ -773,16 +681,12 @@ d3.json("data.json", function(data) {
 		.attr('x2', options.width/2);
 	
 	// hover rect
-	
-/*
 	var canvas = d3.select('body')
 		.append('div')
 		.classed('infoContainer', true)
 		.attr('style', 'display:none');
-*/
 		
-	/*
-	
+		
 	$('body').on('mousemove', function() {
 
 		var left = currentMousePos.x + options.mouseDistanzeInfo;
@@ -795,6 +699,5 @@ d3.json("data.json", function(data) {
 			'left': left+'px'
 		});
 	});
-*/
 
 });
