@@ -74,18 +74,22 @@ body.level_3 svg g.bar_year > rect.bar_female {
 
 
 /* info text */
-svg  text.info {
+svg  text.info_female,
+svg  text.info_male {
 	fill: white;
 	opacity: 0;
 }
-svg  g.hover > text.info {
+svg  g.hover > text.info_female,
+svg  g.hover > text.info_male {
 	opacity: 1;
 }
 
 /* label */
+svg g.back rect,
 svg g.label rect {
 	fill: white;
 }
+svg g.back text,
 svg g.label text {
 	fill: #0f091d;
 	font-family: arial;

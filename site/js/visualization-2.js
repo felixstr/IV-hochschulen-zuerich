@@ -9,7 +9,7 @@ $(document).mousemove(function(event) {
 });
 
 var options = {
-	'width': 600,
+	'width': 500,
 	'height': 680,
 	'heightClosedMin': 15,
 	'heightClosedIncrease': 0,
@@ -82,8 +82,6 @@ function IV_Highscool_Node() {
 		
 		this.barPositionTop = [];
 	}
-
-	
 	this.addChild = function(key, object) {
 		this.child[key] = object;
 	}
@@ -110,7 +108,7 @@ function IV_Highscool_Node() {
 			
 		var updateTransition = update
 			.transition()
-			.duration(1000)
+			.duration(10000)
 			.attr('transform', function(key, i) { 
 				
 				var result = 'translate(0, '+yPos+')';
@@ -238,7 +236,6 @@ function IV_Highscool_Node() {
 					yPos = self.heightActive / 2;
 				}
 				
-				console.log(xPos);
 				
 				return 'translate('+xPos+', '+yPos+')';
 				
