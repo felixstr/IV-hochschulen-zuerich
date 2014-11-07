@@ -1025,7 +1025,7 @@ function IV_Highscool_Node() {
 			.attr('width', self.width)
 			.attr('height', self.height - self.heightBreadcrump - self.margin)
 			.attr('xlink:href', function() {
-				var result = 'images/test.png';
+				var result = 'images/screen-ingenieurwissenschaft.svg';
 				if (detailImageHack[self.subjectName]) {
 					result = 'images/'+detailImageHack[self.subjectName];
 				}
