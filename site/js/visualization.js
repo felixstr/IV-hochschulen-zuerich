@@ -15,16 +15,7 @@ var options = {
 	'paddingTextWidth': 20,
 	'paddingTextHeight': 6,
 	'marginTextTop': 14,
-	'transitionDuration': 1000,
-	'header': true
-}
-
-
-var detailImageHack = {
-	'theologie': 'theologie.png',
-	'ingenieurwissenschaften': 'screen-ingenieurwissenschaft.svg',
-	'humanmedizin': 'screen-humanmedizin.svg',
-	'fhangewandtelinguistik': 'screen-linguistik.svg',
+	'transitionDuration': 1000
 }
 
 function IV_Highscool_Node() {
@@ -48,6 +39,8 @@ function IV_Highscool_Node() {
 	this.parentPrefix = null;
 	
 	this.dataYear = null;
+	this.detailName = null;
+	
 	this.subjectName = null;
 	
 	this.totalStudents = null;
@@ -123,8 +116,7 @@ function IV_Highscool_Node() {
 				return result;
 			})
 			.classed('bar_'+self.itemName, true)
-			.attr('id', function(key) { return self.idPrefix+key; })
-			.attr('style', function() { return self.visible ? 'display: block' : 'display: none'; });
+			.attr('id', function(key) { return self.idPrefix+key; });
 		
 		// female
 		enter
@@ -210,7 +202,9 @@ function IV_Highscool_Node() {
 			.text(function(key) { return self.formatNumber(self.data[key].female)+' FRAUEN'; });
 		textFemale
 			.attr('y', function(key) {
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) - 4;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) - 4;
+				// var bboxHeight = 20;
+				return self.getBarHeight(key)/2 + bboxHeight;
 			});
 			
 		// info male
@@ -232,10 +226,14 @@ function IV_Highscool_Node() {
 			});
 		textMale
 			.attr('y', function(key) {
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) - 4;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) - 4;
+				// var bboxHeight = 20;
+				return self.getBarHeight(key)/2 + bboxHeight;
 			})
 			.attr('x', function(){
-				return self.width - (d3.select(this).node().getBBox().width) - 20;
+				var bboxWidth = (d3.select(this).node().getBBox().width) + 20;
+				// var bboxWidth = 20;
+				return self.width - bboxWidth;
 			});
 		
 					
@@ -268,12 +266,14 @@ function IV_Highscool_Node() {
 			.attr('transform', function(key) { return self.translateLabel(this, key); })
 			.select('rect')
 			.attr('width', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.width+options.paddingTextWidth;
+				var bboxWidth = d3.select(this.parentNode).select('text').node().getBBox().width;
+				// var bboxWidth = 20;
+				return bboxWidth+options.paddingTextWidth;
 			})
 			.attr('height', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.height+options.paddingTextHeight;
+				var bboxHeight = d3.select(this.parentNode).select('text').node().getBBox().height;
+				// var bboxHeight = 20;
+				return bboxHeight+options.paddingTextHeight;
 			});
 			
 		
@@ -282,8 +282,7 @@ function IV_Highscool_Node() {
 			.append('g')
 			.attr('id', self.idPrefix+'back_top')
 			.classed('back', true)
-			.classed('back_top', true)
-			.attr('style', 'display: none');
+			.classed('back_top', true);
 		backGroup
 			.append('rect')
 			.attr('x', 0)
@@ -306,8 +305,7 @@ function IV_Highscool_Node() {
 			.append('g')
 			.attr('id', self.idPrefix+'back_bottom')
 			.classed('back', true)
-			.classed('back_bottom', true)
-			.attr('style', 'display: none');
+			.classed('back_bottom', true);
 		backGroup
 			.append('rect')
 			.attr('x', 0)
@@ -326,7 +324,9 @@ function IV_Highscool_Node() {
 			.on('mouseover', function(key) { self.barMouseOver(); })
 			.on('mouseout', function(key) { self.barMouseOut(); });
 		
-		self.resizeLabel(this.container.selectAll('g.back'));
+		self.resizeLabel(d3.selectAll('#'+this.container.attr('id')+' > g.back'));
+		
+		$('#'+self.idPrefix+'back_top, #'+self.idPrefix+'back_bottom').css('display', 'none');
 			
 			
 		if (self.breadcrump != '') {
@@ -363,6 +363,8 @@ function IV_Highscool_Node() {
 			}
 			
 		});
+		
+		$('g.bar_'+self.itemName).css('display', (self.visible ? 'block' : 'none'));
 			
 	}
 	
@@ -410,7 +412,7 @@ function IV_Highscool_Node() {
 		groupBar
 			.select('g.label')
 			.attr('style', 'display: block')
-			.attr('transform', function(key) {	
+			.attr('transform', function(key) {
 				var result = self.translateLabel(this, key); 
 				return result; 
 			});
@@ -418,13 +420,15 @@ function IV_Highscool_Node() {
 		groupBar
 			.select('text.info_female')
 			.attr('y', function(key) {
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) - 4;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) - 4;
+				return self.getBarHeight(key)/2 + bboxHeight;
 			})
 			.attr('fill-opacity', 1);
 		groupBar
 			.select('text.info_male')
 			.attr('y', function(key) {
-				return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) - 4;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) - 4;
+				return self.getBarHeight(key)/2 + bboxHeight;
 			})
 			.attr('fill-opacity', 1);
 
@@ -439,14 +443,15 @@ function IV_Highscool_Node() {
 			.each('start', function(key, i) {
 				
 				// neues level schreiben
-				// $('body').attr('class', 'level_'+(self.level));				
 					 
 				d3.selectAll('#'+self.idPrefix+key+' > g.label')
 					.attr('opacity', 0)
 					.attr('style', 'display: block')
 					.transition()
 					.duration(500)
-					.attr('opacity', 1);				
+					.attr('opacity', 1);	
+					
+				// console.log('draw-current-end');			
 				
 			});
 
@@ -462,6 +467,7 @@ function IV_Highscool_Node() {
 		var self = this;
 		// console.log('drawBase');
 		self.child[self.currentKey].close(function() {
+			// console.log('child-closed');
 			
 			d3.selectAll('#'+self.idPrefix+self.currentKey+' g.breadcrump').attr('style', 'display:none');
 			
@@ -474,11 +480,13 @@ function IV_Highscool_Node() {
 			if (self.level > 0) {
 				yPos += self.heightBreadcrump+self.margin;
 			}
-			
-			// console.log(yPos);
-		
+					
 			var groupBar = selection
 				.data(self.keys);
+				
+			groupBar
+				.select('g.label')
+				.attr('style', 'display: block');
 				
 			var updateTransition = groupBar
 				.transition()
@@ -510,7 +518,7 @@ function IV_Highscool_Node() {
 				.attr('height', function(key) {
 					return self.getBarHeight(key);
 				});
-
+				
 			updateTransition
 				.select('line.line50')
 				.attr('y1', 0)
@@ -520,19 +528,21 @@ function IV_Highscool_Node() {
 			
 			updateTransition
 				.select('g.label')
-				.attr('style', 'display: block')
 				.attr('opacity', 1)
-				.attr('transform', function(key) { return self.translateLabel(this, key) });						
+				.attr('transform', function(key) { return self.translateLabel(this, key) });								
 			updateTransition
 				.select('text.info_female')
 				.attr('y', function(key) {
-					return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
+					var bboxHeight = (d3.select(this).node().getBBox().height/2) -2;
+					return self.getBarHeight(key)/2 + bboxHeight;
 				})
 				.attr('fill-opacity', 1);
+			
 			updateTransition
 				.select('text.info_male')
 				.attr('y', function(key) {
-					return self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
+					var bboxHeight = (d3.select(this).node().getBBox().height/2) -2;
+					return self.getBarHeight(key)/2 + bboxHeight;
 				})
 				.attr('fill-opacity', 1);
 			
@@ -560,14 +570,7 @@ function IV_Highscool_Node() {
 			.attr('style', 'display: block')
 			.transition()
 			.duration(1)
-			.attr('opacity', 1)
-			.each('end', function(key, i) {
-				if (i == 0) {
-					
-					
-		
-				}
-			});
+			.attr('opacity', 1);
 		
 	}
 	
@@ -669,6 +672,7 @@ function IV_Highscool_Node() {
 								.attr('style', 'display:none');
 							
 							d3.select('#'+self.idPrefix+self.currentKey+' > g.breadcrump').attr('style', 'display:block');
+							// console.log('draw-current');
 							child.drawCurrent();
 							
 						}	
@@ -725,7 +729,8 @@ function IV_Highscool_Node() {
 		updateTransition
 			.select('text.info_female')
 			.attr('y', function(key) {
-				var yPos = self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) -2;
+				var yPos = self.getBarHeight(key)/2 + bboxHeight;
 				if (key == self.currentKey) { 
 					yPos = self.heightActive / 2;
 				}
@@ -735,7 +740,8 @@ function IV_Highscool_Node() {
 		updateTransition
 			.select('text.info_male')
 			.attr('y', function(key) {
-				var yPos = self.getBarHeight(key)/2 + (d3.select(this).node().getBBox().height/2) -2;
+				var bboxHeight = (d3.select(this).node().getBBox().height/2) -2;
+				var yPos = self.getBarHeight(key)/2 + bboxHeight;
 				if (key == self.currentKey) { 
 					yPos = self.heightActive / 2;
 				}
@@ -768,27 +774,28 @@ function IV_Highscool_Node() {
 			backTopGroup.select('text')
 				.text(labelText.toUpperCase());
 			backTopGroup
+				.attr('style', 'display: block')
 				.attr('transform', function() {
 					var elementText = d3.select(this).select('text').node().getBBox();
-					
+									
 					var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
 					var yPos = self.yPosStartChild/2 - (elementText.height/2) - (options.paddingTextHeight/2)-1;
 					
 					return 'translate('+xPos+', '+yPos+')';	
 				})
-				.attr('style', 'display: block')
 				.attr('opacity', 0)
 				.transition()
 				.duration(500)
 				.attr('opacity', 1);
+			
+			self.resizeLabel(self.container.select('#'+self.idPrefix+'back_top'));
 		}
 
 		if (self.yPosStartChild+self.heightActive < self.height) {
 			
 			if (self.itemName == 'year') {
 				labelText = self.keys[self.keys.length-1];
-				// console.log(self.barPositionTop.length);
-				// console.log(self.keys.length);
+
 				if (self.keys.length - self.barPositionTop.length > 2) {
 					var firstYear = parseInt(self.barPositionTop[self.barPositionTop.length-1])-2;
 					labelText = labelText+' - '+firstYear;
@@ -799,22 +806,25 @@ function IV_Highscool_Node() {
 			backBottomGroup.select('text')
 				.text(labelText.toUpperCase());
 			backBottomGroup
+				.attr('style', 'display: block')
 				.attr('transform', function() {
 					var elementText = d3.select(this).select('text').node().getBBox();
-					
+				
 					var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
 					var yPos = (self.yPosStartChild + self.heightActive) + (self.height - (self.yPosStartChild + self.heightActive))/2 - (elementText.height/2) - (options.paddingTextHeight/2) +1;
 					
 					return 'translate('+xPos+', '+yPos+')';	
 				})
-				.attr('style', 'display: block')
 				.attr('opacity', 0)
 				.transition()
 				.duration(500)
 				.attr('opacity', 1);
+			
+			self.resizeLabel(self.container.select('#'+self.idPrefix+'back_bottom'));
 		}
 		
-		self.resizeLabel(this.container.selectAll('g.back'));
+		
+		
 		
 	}
 	
@@ -827,6 +837,8 @@ function IV_Highscool_Node() {
 				.attr('style', 'display:none')
 			callback();
 		} else {
+			// console.log('close-child');
+			
 			this.container
 				.selectAll('g.bar_'+self.itemName)
 				.attr('opacity', 1)
@@ -835,28 +847,21 @@ function IV_Highscool_Node() {
 				.attr('opacity', 0)
 				.each('end', function(key, i) {
 					d3.select(this).attr('style', 'display:none;');
+					
 					if (i == 0) {
+						// console.log('make reset');
 						self.reset();
 						self.resetChild();
-						
+						 
 						callback();
 					}
+					
 				});
 		}	
 			
 	}
 	
-	this.translateLabel = function(element, key) { 
-		var self = this;
-		var elementText = d3.select(element).select('text').node().getBBox();
-
-		var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
-		var yPos = (self.getBarHeight(key)/2)- (elementText.height/2) - (options.paddingTextHeight/2);
-		
-		// console.log(yPos);
-		
-		return 'translate('+xPos+', '+yPos+')';	
-	}
+	
 	
 	this.reset = function() {
 		var self = this;
@@ -933,14 +938,7 @@ function IV_Highscool_Node() {
 	
 	this.getBarHeight = function(key) {
 		var stuff = this.data[key];
-		if (stuff == undefined) {
-			console.log('keeey');
-			console.log(key);
-			console.log(this.data);
-			console.log(stuff);
-		}
-		
-		
+
 		var total = parseInt(stuff.total);
 		var max = this.height-((this.keys.length-1)*this.margin+(2*this.marginLevel));
 		if (this.level > 0) {
@@ -956,193 +954,266 @@ function IV_Highscool_Node() {
 	
 	this.drawDetail = function() {
 		var self = this;
-		
-		var paddingTop = 100;
-		var paddingBottom = 20;
-		var paddingLeft = 20;
-		var paddingRight = 20;
-		
 		var data = self.data;
 		var dataKeys = Object.keys(data);
 		
-		// console.log(data[self.dataYear]);
-		// console.log(self);
+		// paddings and margins
+		var paddingTextContainer = 30;
+		var graphMarginTop = 115;
+		var graphMarginBottom = 40;
+		var detailHeight = self.height - self.heightBreadcrump - self.margin;
+		var yearLabelMarginBottom = 10;
+		var yearWidth = self.width/dataKeys.length;
+		var yearHeight = detailHeight-graphMarginTop;
 		
-		var xRange = d3.scale.linear()
-			.range([paddingLeft, self.width-paddingLeft-paddingRight])
-			.domain([
-				d3.min(dataKeys, function (d) { return d; }),
-				d3.max(dataKeys, function (d) { return d; })
-			]);
-	
-	
-
-		var yRange = d3.scale.linear()
-		    .range([self.height - self.heightBreadcrump - self.margin - paddingBottom, paddingTop])
-			.domain([
-				d3.min(dataKeys, function (d) { 
-					var male = parseInt(data[d].male);
-					var female = parseInt(data[d].female);
-					return male > female ? female : male; 
-				}),
-				d3.max(dataKeys, function (d) {
-					var male = parseInt(data[d].male);
-					var female = parseInt(data[d].female);
-					return male > female ? male : female; 	
-				})
-			]);
-		    
-	
-		var lineFuncFemale = d3.svg.line()
-			.x(function (d) { return xRange(d); })
-			.y(function (d) { return yRange(data[d].female); })
-			.interpolate('linear');
-		
-		var lineFuncMale = d3.svg.line()
-			.x(function (d) { return xRange(d); })
-			.y(function (d) { return yRange(data[d].male); })
-			.interpolate('linear');
-
 		var group = this.container
 			.append('g')
 			.classed('detail', true)
-			.attr('style', 'display:none')
 			.attr('transform', function(key, i) { 
 				var yPos = self.heightBreadcrump+self.margin;
 				var result = 'translate(0, '+yPos+')';
 				return result;
 			});
 		
-		
-		
 		// background
 		group
 			.append('rect')
+			.classed('background', true)
 			.attr('width', self.width)
-			.attr('height', self.height - self.heightBreadcrump - self.margin);
-		group
-			.append('image')
-			.attr('width', self.width)
-			.attr('height', self.height - self.heightBreadcrump - self.margin)
-			.attr('xlink:href', function() {
-				var result = 'images/screen-ingenieurwissenschaft.svg';
-				if (detailImageHack[self.subjectName]) {
-					result = 'images/'+detailImageHack[self.subjectName];
-				}
-				return result;
-			});
+			.attr('height', detailHeight);
 		
-		/*
-		// text frauen
-		var xPos = 20;
-		var yPos = 30;
-		var xAdd = 90;
-		var yAdd = 30;
-		// text anteil % frau
-		group 
-			.append('text')
-			.classed('label', true)
-			.attr('x', xPos)
-			.attr('y', yPos)
-			.text('ANTEIL');
-		group
-			.append('text')
-			.classed('value', true)
-			.attr('x', xPos)
-			.attr('y', yPos+yAdd)
-			.text(data[self.dataYear].female_percent);
-			
-		// text total frau
-		group 
-			.append('text')
-			.classed('label', true)
-			.attr('x', xPos += xAdd)
-			.attr('y', yPos)
-			.text('FRAUEN');
-		group
-			.append('text')
-			.classed('value', true)
-			.attr('x', xPos)
-			.attr('y', yPos+yAdd)
-			.text(data[self.dataYear].female);
-		
-		if (data[self.dataYear].female_age) {
-			// text alter frau
-			group 
-				.append('text')
-				.classed('label', true)
-				.attr('x', xPos += xAdd)
-				.attr('y', yPos)
-				.text('Ø ALTER');
-			group
-				.append('text')
-				.classed('value', true)
-				.attr('x', xPos)
-				.attr('y', yPos+yAdd)
-				.text(data[self.dataYear].female_age);
-		}
-		
-		// text männer
-		var xPos = 600;
-		var yPos = 30;
-		var xAdd = 90;
-		var yAdd = 30;
-		// text anteil % frau
-		group 
-			.append('text')
-			.classed('label', true)
-			.attr('x', xPos)
-			.attr('y', yPos)
-			.text('ANTEIL');
-		group
-			.append('text')
-			.classed('value', true)
-			.attr('x', xPos)
-			.attr('y', yPos+yAdd)
-			.text(data[self.dataYear].male_percent);
-			
-		// text total frau
-		group 
-			.append('text')
-			.classed('label', true)
-			.attr('x', xPos += xAdd)
-			.attr('y', yPos)
-			.text('MÄNNER');
-		group
-			.append('text')
-			.classed('value', true)
-			.attr('x', xPos)
-			.attr('y', yPos+yAdd)
-			.text(data[self.dataYear].male);
-		
-		if (data[self.dataYear].male_age) {
-			// text alter frau
-			group 
-				.append('text')
-				.classed('label', true)
-				.attr('x', xPos += xAdd)
-				.attr('y', yPos)
-				.text('Ø ALTER');
-			group
-				.append('text')
-				.classed('value', true)
-				.attr('x', xPos)
-				.attr('y', yPos+yAdd)
-				.text(data[self.dataYear].male_age);
-		}
-		
-		
+		// title
+		// label
+		var nameLabelG = group
+			.append('g')
+			.classed('detailName', true);
 
+		var labelRect = nameLabelG
+			.append('rect')
+			.attr('x', 0)
+			.attr('y', 0)
+			.attr('rx', 10)
+			.attr('ry', 10);
+			
+		var labelText = nameLabelG
+			.append('text')
+			.attr('x', options.paddingTextWidth/2)
+			.attr('y', options.marginTextTop)
+			.text(self.detailName.toUpperCase());
+		
+		nameLabelG
+			.attr('transform', function() {
+				var elementText = d3.select(this).select('text').node().getBBox();
+					
+				var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
+				return 'translate('+xPos+', '+paddingTextContainer+')';
+			});
+			
+		self.resizeLabel(nameLabelG);
+		
+		
+		
+		// text
+		{
+			var textWidth = 110;
+			var textSpace = 30;
+			// frau
+			var numbers = {
+				'ANTEIL': data[self.dataYear].female_percent+'%',
+				'FRAUEN': data[self.dataYear].female,
+				'ZU/ABSTIEG': (data[self.dataYear].female_trend < 0 ? '' : '+')+data[self.dataYear].female_trend+'%'
+			};
+			if (data[self.dataYear].female_age != undefined) {
+				numbers['Ø ALTER'] = data[self.dataYear].female_age;
+			}
+			var xPos = paddingTextContainer;
+			var numbersGroup = group.selectAll('g.numberFemale');
+			var numberGroup = numbersGroup
+				.data(Object.keys(numbers))
+				.enter()
+				.append('g')
+				.classed('numberFemale', true);
+			numberGroup
+				.append('text')
+				.classed('label', true)
+				.attr('y', 11)
+				.text(function(key) { return key });
+			numberGroup
+				.append('text')
+				.classed('value', true)
+				.attr('y', 47)
+				.text(function(key) { return numbers[key]; });
+			numberGroup
+				.attr('transform', function() {
+					var valueWidth = d3.select(this).select('text.value').node().getBBox().width;
+					var labelWidth = d3.select(this).select('text.label').node().getBBox().width;
+					
+					var result = 'translate('+xPos+', '+paddingTextContainer+')';
+					var elementWidth = labelWidth
+					if (valueWidth > labelWidth) {
+						elementWidth = valueWidth;
+					}
+					xPos += elementWidth + textSpace;
+					return result;
+				});
+			
+			
+			// mann
+			var numbers = {};
+			if (data[self.dataYear].male_age != undefined) {
+				numbers['Ø ALTER'] = data[self.dataYear].male_age;
+			}
+			numbers['ZU/ABSTIEG'] = (data[self.dataYear].male_trend < 0 ? '' : '+')+data[self.dataYear].male_trend+'%';
+			numbers['MÄNNER'] = data[self.dataYear].male;
+			numbers['ANTEIL'] = data[self.dataYear].male_percent+'%';
+			
+			var xPos = self.width - paddingTextContainer;
+			var numbersGroup = group.selectAll('g.numberMale');
+			var numberGroup = numbersGroup
+				.data(Object.keys(numbers))
+				.enter()
+				.append('g')
+				.classed('numberMale', true);
+			numberGroup
+				.append('text')
+				.classed('label', true)
+				.attr('y', 11)
+				.text(function(key) { return key });
+			numberGroup
+				.append('text')
+				.classed('value', true)
+				.attr('y', 47)
+				.text(function(key) { return numbers[key]; });
+			numberGroup
+				.attr('transform', function() {
+					var valueWidth = d3.select(this).select('text.value').node().getBBox().width;
+					var labelWidth = d3.select(this).select('text.label').node().getBBox().width;					
+					var elementWidth = labelWidth
+					if (valueWidth > labelWidth) {
+						elementWidth = valueWidth;
+					}
+					
+					xPos -= elementWidth;
+					var result = 'translate('+xPos+', '+paddingTextContainer+')';
+					xPos -= textSpace;
+					
+					return result;
+				});
+				
+		}
+
+	
+		
 		// graf frau/mann
-		group
-			.append("path")
-			.attr("class", "line female")
-			.attr("d", lineFuncFemale(dataKeys));
-		group
-			.append("path")
-			.attr("class", "line male")
-			.attr("d", lineFuncMale(dataKeys));
-	*/		
+		{
+			var xRange = d3.scale.linear()
+				.range([yearWidth/2, self.width-yearWidth/2])
+				.domain([
+					d3.min(dataKeys, function (d) { return d; }),
+					d3.max(dataKeys, function (d) { return d; })
+				]);
+		
+		
+	
+			var yRange = d3.scale.linear()
+			    .range([detailHeight - graphMarginBottom, graphMarginTop+20])
+				.domain([
+					d3.min(dataKeys, function (d) { 
+						var male = parseInt(data[d].male);
+						var female = parseInt(data[d].female);
+						return male > female ? female : male; 
+					}),
+					d3.max(dataKeys, function (d) {
+						var male = parseInt(data[d].male);
+						var female = parseInt(data[d].female);
+						return male > female ? male : female; 	
+					})
+				]);
+			    
+		
+			var lineFuncFemale = d3.svg.line()
+				.x(function (d) { return xRange(d); })
+				.y(function (d) { return yRange(data[d].female); })
+				.interpolate('linear');
+			
+			var lineFuncMale = d3.svg.line()
+				.x(function (d) { return xRange(d); })
+				.y(function (d) { return yRange(data[d].male); })
+				.interpolate('linear');
+					
+			group
+				.append("path")
+				.attr("class", "line female")
+				.attr("d", lineFuncFemale(dataKeys));
+			group
+				.append("path")
+				.attr("class", "line male")
+				.attr("d", lineFuncMale(dataKeys));
+			
+			var pointsFemale = group.selectAll('circle.female');
+			pointsFemale
+				.data(dataKeys)
+				.enter()
+				.append('circle')
+				.classed('female', true)
+				.attr('r', 4)
+				.attr('cx', function(key) { return xRange(key) })
+				.attr('cy', function(key) { return yRange(data[key].female ) });
+			
+			var pointsMale = group.selectAll('circle.male');
+			pointsMale
+				.data(dataKeys)
+				.enter()
+				.append('circle')
+				.classed('male', true)
+				.attr('r', 4)
+				.attr('cx', function(key) { return xRange(key) })
+				.attr('cy', function(key) { return yRange(data[key].male ) });
+		
+		}
+
+		// year labels
+		{
+			var yearGroups = group.selectAll('g.year');
+			var xPos = 0;
+			
+			var enterYear = yearGroups
+				.data(dataKeys)
+				.enter()
+				.append('g')
+				.classed('year', true)
+				.classed('current', function(key) { return key == self.dataYear; })
+				.attr('id', function(key) { return 'detail_year_'+key; })
+				.attr('transform', function(key, i) {
+					var result = 'translate('+xPos+', '+graphMarginTop+')';
+					xPos += yearWidth;
+					return result;
+				});
+			enterYear
+				.append('rect')
+				.attr('x', function(key, i) { return i == 0 ? 0 : 2 })
+				.attr('y', 0)
+				.attr('width', function(key, i) { return i == 0 ? yearWidth : yearWidth-1 })
+				.attr('height', yearHeight)
+				.on('mouseover', function(key) {
+					self.updateDetail(key)
+				})
+				.on('mouseout', function() {
+					self.updateDetail(self.dataYear)
+				});
+			enterYear
+				.append('text')
+				.text(function(key) {return key;})
+				.attr('x', yearWidth/2)
+				.attr('y', yearHeight-yearLabelMarginBottom);
+			enterYear
+				.append('line')
+				.attr('x1', yearWidth+1)
+				.attr('x2', yearWidth+1)
+				.attr('y1', yearHeight-yearLabelMarginBottom)
+				.attr('y2', yearHeight);
+		}
+				
 		if (self.breadcrump != '') {
 			var breadcrumpGroup = this.container
 				.append('g')
@@ -1159,27 +1230,152 @@ function IV_Highscool_Node() {
 				.attr('y', (this.heightBreadcrump/2)+4)
 				.text(self.breadcrump.toUpperCase());	
 		}
-
+		
+		
+		this.container.select('g.detail')
+			.attr('style', 'display:none');
   
+	}
+	this.showDetail = function() {
+		var self = this;
+		
+		this.container.selectAll('rect.bar_male, rect.bar_female, rect.overlay').attr('style', 'display:none');
+		this.container.select('g.breadcrump').attr('style', 'display:block');
+		this.container.select('g.detail').attr('style', 'display:block');
+		
+		this.updateDetail(self.dataYear);
+		
+	}
+	
+	this.updateDetail = function(key) {
+		var self = this; 
+		
+		var paddingTextContainer = 30;
+		
+		this.container.select('g.current')
+			.classed('current', false);
+		
+		this.container.select('#detail_year_'+key)
+			.classed('current', true);
+		
+		
+		// background
+		{
+			var percent_1 = 0;
+			if (self.data[key].female_percent > 50) {
+				percent_1 = self.data[key].female_percent - 50;
+				percent_2 = 100 + percent_1;
+			} else {
+				percent_1 = 0 - (50 - self.data[key].female_percent);
+				percent_2 = 100 + percent_1;
+			}
+			d3.select('#gradientStop1')
+				.attr('offset', percent_1+'%');
+			d3.select('#gradientStop2')
+				.attr('offset', percent_2+'%');
+		}
+		
+		// text
+		{
+			var textWidth = 110;
+			var textSpace = 30;
+			// frau
+			var trend = '';
+			if (self.data[key].female_trend != undefined) {
+				var trend = (self.data[key].female_trend < 0 ? '' : '+')+self.data[key].female_trend+'%';
+			}
+			var numbers = {
+				'ANTEIL': self.data[key].female_percent+'%',
+				'FRAUEN': self.data[key].female,
+				'ZU/ABSTIEG': trend
+			};
+			if (self.data[key].female_age != undefined) {
+				numbers['Ø ALTER'] = self.data[key].female_age;
+			}
+			var xPos = paddingTextContainer;
+			var numbersGroup = this.container.selectAll('g.numberFemale');
+			var numberGroup = numbersGroup
+				.data(Object.keys(numbers));
+			numberGroup
+				.select('text.value')
+				.text(function(key) { return numbers[key]; });
+			numberGroup
+				.transition()
+				.duration(200)
+				.attr('transform', function() {
+					var elementTextValue = d3.select(this).select('text.value').node().getBBox();
+					var elementTextLabel = d3.select(this).select('text.label').node().getBBox();
+					var result = 'translate('+xPos+', '+paddingTextContainer+')';
+					var elementWidth = elementTextLabel.width
+					if (elementTextValue.width > elementTextLabel.width) {
+						elementWidth = elementTextValue.width;
+					}
+					xPos += elementWidth + textSpace;
+					return result;
+				});
+			
+			
+			// mann
+			var trend = '';
+			if (self.data[key].male_trend != undefined) {
+				trend = (self.data[key].male_trend < 0 ? '' : '+')+self.data[key].male_trend+'%';
+			}
+			var numbers = {};
+			if (self.data[key].male_age != undefined) {
+				numbers['Ø ALTER'] = self.data[key].male_age;
+			}
+			numbers['ZU/ABSTIEG'] = trend;
+			numbers['MÄNNER'] = self.data[key].male;
+			numbers['ANTEIL'] = self.data[key].male_percent+'%';
+			
+			var xPos = self.width - paddingTextContainer;
+			var numbersGroup = this.container.selectAll('g.numberMale');
+			var numberGroup = numbersGroup
+				.data(Object.keys(numbers));
+			numberGroup
+				.select('text.value')
+				.text(function(key) { return numbers[key]; });
+			numberGroup
+				.transition()
+				.duration(200)
+				.attr('transform', function() {
+					var elementTextValue = d3.select(this).select('text.value').node().getBBox();
+					var elementTextLabel = d3.select(this).select('text.label').node().getBBox();
+					var elementWidth = elementTextLabel.width
+					if (elementTextValue.width > elementTextLabel.width) {
+						elementWidth = elementTextValue.width;
+					}
+					
+					xPos -= elementWidth;
+					var result = 'translate('+xPos+', '+paddingTextContainer+')';
+					xPos -= textSpace;
+					return result;
+				});
+			
+		}
+
 	}
 	
 	this.resizeLabel = function(groupElement) {
 		groupElement.select('rect')
 			.attr('width', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.width+options.paddingTextWidth;
+				var bboxWidth = d3.select(this.parentNode).select('text').node().getBBox().width;
+				return bboxWidth+options.paddingTextWidth;
 			})
 			.attr('height', function() {
-				var elementText = d3.select(this.parentNode).select('text').node().getBBox();
-				return elementText.height+options.paddingTextHeight;
+				var bboxHeight = d3.select(this.parentNode).select('text').node().getBBox().height;
+				return bboxHeight+options.paddingTextHeight;
 			});
 	}
 	
+	this.translateLabel = function(element, key) { 
+		var self = this;
+		var elementText = d3.select(element).select('text').node().getBBox();
 
-	this.showDetail = function() {
-		this.container.selectAll('rect.bar_male, rect.bar_female, rect.overlay').attr('style', 'display:none');
-		this.container.select('g.breadcrump').attr('style', 'display:block');
-		this.container.select('g.detail').attr('style', 'display:block');
+		var xPos = (self.width/2) - (elementText.width/2) - (options.paddingTextWidth/2);
+		var yPos = (self.getBarHeight(key)/2)- (elementText.height/2) - (options.paddingTextHeight/2);
+		
+		return 'translate('+xPos+', '+yPos+')';	
 	}
 	
 	this.formatNumber = function(nStr) {
@@ -1199,151 +1395,153 @@ function IV_Highscool_Node() {
 
 var Translation = {
 	'year': 'Jahre',
-	'school': 'Hochschulen',
+	'school': 'Schulen',
 	'subject': 'Fakultäten',
 	'fh_subject': 'Studiengänge'
 }
 
 $(document).ready(function() {
-d3.json("data.json", function(data) {
-	
-	$('section#wrapper').css('width', options.width+'px');
-	
-	$('header').on('click', function() {
-		if ($('#info').hasClass('show')) {
+	d3.json("data.json", function(data) {
+		
+		$('section#wrapper').css('width', options.width+'px');
+		
+		$('header').on('click', function() {
+			if ($('#info').hasClass('show')) {
+				$('#info').removeClass('show');
+			} else {
+				$('#info').show();
+				$('#info').addClass('show');
+			}
+		});
+		$('#info').on('click', function() {
 			$('#info').removeClass('show');
-		} else {
-			$('#info').show();
-			$('#info').addClass('show');
-		}
-	});
-	$('#info').on('click', function() {
-		$('#info').removeClass('show');
-	});
-	
-	var canvas = d3.select('#graph')
-		.attr('width', options.width)
-		.attr('height', options.height);
-	
-	// defs
-	{
-	
-		var defs = canvas.append("svg:defs");
-		var gradientFemale = defs
-			.append("svg:linearGradient")
-			.attr("id", "gradientFemale")
-			.attr("x1", "0%")
-			.attr("y1", "0%")
-			.attr("x2", "100%")
-			.attr("y2", "0%")
-			.attr("spreadMethod", "pad");
-		gradientFemale.append("svg:stop")
-	    	.attr("offset", "0%")
-			.attr("stop-color", "#d52a35")
-			.attr("stop-opacity", 1);
-		gradientFemale.append("svg:stop")
-	    	.attr("offset", "100%")
-			.attr("stop-color", "#810012")
-			.attr("stop-opacity", 1);
-		
-		var gradientMale = defs
-			.append("svg:linearGradient")
-			.attr("id", "gradientMale")
-			.attr("x1", "0%")
-			.attr("y1", "0%")
-			.attr("x2", "100%")
-			.attr("y2", "0%")
-			.attr("spreadMethod", "pad");
-		gradientMale.append("svg:stop")
-	    	.attr("offset", "0%")
-			.attr("stop-color", "#092550")
-			.attr("stop-opacity", 1);
-		gradientMale.append("svg:stop")
-	    	.attr("offset", "100%")
-			.attr("stop-color", "#127487")
-			.attr("stop-opacity", 1);
-		
-		var gradientDetail = defs
-			.append("svg:linearGradient")
-			.attr("id", "gradientDetail")
-			.attr("x1", "0%")
-			.attr("y1", "0%")
-			.attr("x2", "100%")
-			.attr("y2", "0%")
-			.attr("spreadMethod", "pad");
-		gradientDetail.append("svg:stop")
-	    	.attr("offset", "0%")
-			.attr("stop-color", "#0b1628")
-			.attr("stop-opacity", 1);
-		gradientDetail.append("svg:stop")
-	    	.attr("offset", "100%")
-			.attr("stop-color", "#810012")
-			.attr("stop-opacity", 1);
-	}
-	
-	
-
-	var yearObj = new IV_Highscool_Node();
-	yearObj.visible = true;
-	yearObj.container = canvas;
-	yearObj.width = options.width;
-	yearObj.height = options.height;
-	yearObj.itemName = 'year';
-	yearObj.marginLevel = 0;
-	yearObj.front = true;
-	yearObj.data = data.chronologic;
-	yearObj.initialize();
-	yearObj.update();
-	
-	
-	Object.keys(data.chronologic).forEach(function(year) {
-		var schoolObj = new IV_Highscool_Node();
-		schoolObj.itemName = 'school';
-		schoolObj.parentPrefix = year+'_';
-		schoolObj.data = data.chronologic[year].schools;
-		schoolObj.level = 1;
-		schoolObj.breadcrump = year;
-		schoolObj.initialize();
-		
-		Object.keys(data.chronologic[year].schools).forEach(function(school) {			
-			var subjectObj = new IV_Highscool_Node();
-			subjectObj.itemName = 'subject';
-			subjectObj.parentPrefix = schoolObj.parentPrefix+school+'_';
-			subjectObj.data = data.chronologic[year].schools[school].subject;
-			subjectObj.detailData = data.detail[school];
-			subjectObj.level = 2;
-			subjectObj.breadcrump = year+' > '+data.chronologic[year].schools[school].name;
-			subjectObj.initialize();
-			
-			Object.keys(data.chronologic[year].schools[school].subject).forEach(function(subject) {
-				var detailObj = new IV_Highscool_Node();
-				detailObj.itemName = 'detail';
-				detailObj.parentPrefix = subjectObj.parentPrefix+subject+'_';
-				detailObj.data = data.detail[school][subject];
-				detailObj.dataYear = year;
-				detailObj.subjectName = subject;
-				detailObj.detail = true;
-				detailObj.level = 3;
-				// detailObj.breadcrump = year+' > '+data.chronologic[year].schools[school].name+' > '+data.chronologic[year].schools[school].subject[subject].name;
-				detailObj.breadcrump = year+' > '+data.chronologic[year].schools[school].name+' > JAHRESVERLAUF 2000-2011';
-				detailObj.initialize();
-				
-				subjectObj.addChild(subject, detailObj);
-				
-			});
-			
-			
-			schoolObj.addChild(school, subjectObj);
 		});
 		
-		yearObj.addChild(year, schoolObj);
+		var canvas = d3.select('#graph')
+			.attr('width', options.width)
+			.attr('height', options.height);
+		
+		// defs
+		{
+		
+			var defs = canvas.append("svg:defs");
+			var gradientFemale = defs
+				.append("svg:linearGradient")
+				.attr("id", "gradientFemale")
+				.attr("x1", "0%")
+				.attr("y1", "0%")
+				.attr("x2", "100%")
+				.attr("y2", "0%")
+				.attr("spreadMethod", "pad");
+			gradientFemale.append("svg:stop")
+		    	.attr("offset", "0%")
+				.attr("stop-color", "#d52a35")
+				.attr("stop-opacity", 1);
+			gradientFemale.append("svg:stop")
+		    	.attr("offset", "100%")
+				.attr("stop-color", "#810012")
+				.attr("stop-opacity", 1);
+			
+			var gradientMale = defs
+				.append("svg:linearGradient")
+				.attr("id", "gradientMale")
+				.attr("x1", "0%")
+				.attr("y1", "0%")
+				.attr("x2", "100%")
+				.attr("y2", "0%")
+				.attr("spreadMethod", "pad");
+			gradientMale.append("svg:stop")
+		    	.attr("offset", "0%")
+				.attr("stop-color", "#092550")
+				.attr("stop-opacity", 1);
+			gradientMale.append("svg:stop")
+		    	.attr("offset", "100%")
+				.attr("stop-color", "#127487")
+				.attr("stop-opacity", 1);
+			
+			var gradientDetail = defs
+				.append("svg:linearGradient")
+				.attr("id", "gradientDetail")
+				.attr("x1", "0%")
+				.attr("y1", "0%")
+				.attr("x2", "100%")
+				.attr("y2", "0%")
+				.attr("spreadMethod", "pad");
+			gradientDetail.append("svg:stop")
+				.attr('id', 'gradientStop1')
+		    	.attr("offset", "0%")
+				.attr("stop-color", "#810012")
+				.attr("stop-opacity", 1);
+			gradientDetail.append("svg:stop")
+				.attr('id', 'gradientStop2')
+		    	.attr("offset", "100%")
+				.attr("stop-color", "#092550")
+				.attr("stop-opacity", 1);
+		}
+		
+		
+	
+		var yearObj = new IV_Highscool_Node();
+		yearObj.visible = true;
+		yearObj.container = canvas;
+		yearObj.width = options.width;
+		yearObj.height = options.height;
+		yearObj.itemName = 'year';
+		yearObj.marginLevel = 0;
+		yearObj.front = true;
+		yearObj.data = data.chronologic;
+		yearObj.initialize();
+		yearObj.update();
+		
+		
+		Object.keys(data.chronologic).forEach(function(year) {
+			var schoolObj = new IV_Highscool_Node();
+			schoolObj.itemName = 'school';
+			schoolObj.parentPrefix = year+'_';
+			schoolObj.data = data.chronologic[year].schools;
+			schoolObj.level = 1;
+			schoolObj.breadcrump = year;
+			schoolObj.initialize();
+			
+			Object.keys(data.chronologic[year].schools).forEach(function(school) {			
+				var subjectObj = new IV_Highscool_Node();
+				subjectObj.itemName = 'subject';
+				subjectObj.parentPrefix = schoolObj.parentPrefix+school+'_';
+				subjectObj.data = data.chronologic[year].schools[school].subject;
+				subjectObj.detailData = data.detail[school];
+				subjectObj.level = 2;
+				subjectObj.breadcrump = year+' > '+data.chronologic[year].schools[school].name;
+				subjectObj.initialize();
+				
+				Object.keys(data.chronologic[year].schools[school].subject).forEach(function(subject) {
+					var detailObj = new IV_Highscool_Node();
+					detailObj.itemName = 'detail';
+					detailObj.parentPrefix = subjectObj.parentPrefix+subject+'_';
+					detailObj.data = data.detail[school][subject];
+					detailObj.dataYear = year;
+					detailObj.subjectName = subject;
+					detailObj.detail = true;
+					detailObj.detailName = data.chronologic[year].schools[school].subject[subject].name;
+					detailObj.level = 3;
+					detailObj.breadcrump = year+' > '+data.chronologic[year].schools[school].name+' > JAHRESVERLAUF 2000-2011';
+					detailObj.initialize();
+					
+					subjectObj.addChild(subject, detailObj);
+					
+				});
+				
+				
+				schoolObj.addChild(school, subjectObj);
+			});
+			
+			yearObj.addChild(year, schoolObj);
+		});
+		
+		
+		yearObj.drawInit();
+		
+		// console.log('finish');
+	
 	});
-	
-	
-	yearObj.drawInit();
-	
-
-
-});
 
 });

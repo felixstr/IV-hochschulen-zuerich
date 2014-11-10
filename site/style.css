@@ -78,17 +78,6 @@ svg rect.bar_female {
 	cursor: pointer;
 }
 
-svg g.bar_year > rect.bar_male,
-svg g.bar_school > rect.bar_male,
-svg g.bar_subject > rect.bar_male {
-	fill: url(#gradientMale);
-}
-svg g.bar_year > rect.bar_female,
-svg g.bar_school > rect.bar_female,
-svg g.bar_subject > rect.bar_female {
-	fill: url(#gradientFemale);
-}
-
 .overlay {
 	opacity: 0;
 	cursor: pointer;
@@ -280,8 +269,28 @@ g.breadcrump text {
 
 /* detail */
 
-g.detail rect {
-	fill: url(#gradientDetail);
+
+g.detail g.detailName rect {
+	fill: white;
+}
+g.detail g.detailName text {
+	font-size: 13px;
+	fill: #0f091d;
+}
+g.detail g.year rect {
+	fill: rgba(18,8,19, 0.40);
+	opacity: 0;
+}
+g.detail g.year.current rect {
+	opacity: 1;
+}
+g.detail g.year text {
+	font-size: 12px;
+	text-anchor: middle;
+}
+g.detail g.year line {
+	stroke: white;
+	stroke-width: 1;
 }
 
 g.detail text {
@@ -295,19 +304,25 @@ g.detail text.label {
 	font-size: 15px;
 }
 g.detail text.value {
-	font-size: 30px;
+	font-size: 35px;
+	font-family: 'bryantregular_condensed';
 }
 
 path.line {
 	fill: none;
-	stroke: #777;
-    shape-rendering: crispEdges;
+	stroke-width: 3;
 }
 path.female {
-	stroke: red;
+	stroke: #d62b35;
+}
+circle.female {
+	fill: #d62b35;
 }
 path.male {
-	stroke: blue;
+	stroke: #1e63fe;
+}
+circle.male {
+	fill: #1e63fe;
 }
 
 /* info screen */
@@ -318,7 +333,7 @@ path.male {
 	width: 100%;
 	height: 100%;
 	opacity: 0;
-	background: rgba(0, 0, 0, 0.8);
+	background: rgba(0, 0, 0, 0.9);
 	
 	color: white;
 	
